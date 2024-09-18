@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import ".././styles.css"; // Add this line to link the CSS file
 
 const GitHubRepositories = () => {
@@ -7,7 +7,6 @@ const GitHubRepositories = () => {
   const [endCursor, setEndCursor] = useState(null); // Store the endCursor for pagination
   const [hasNextPage, setHasNextPage] = useState(false); // To track if there's a next page
   const [reposPerPage] = useState(5); // Number of repositories per page
-  const observerRef = useRef(null); // Ref for the infinite scroll trigger element
 
   // Fetch repositories using GitHub's GraphQL API with cursor-based pagination
   const fetchRepositories = async (cursor = null) => {
@@ -79,26 +78,10 @@ const GitHubRepositories = () => {
     fetchRepositories(); // Initial fetch (without a cursor)
   }, [reposPerPage]); // Fetch the next page of repositories when the reposPerPage changes
 
-  // Use the Intersection Observer to implement infinite scrolling
-  useEffect(() => {
-    if (loading || !hasNextPage) return; // Don't observe if already loading or no next page
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        fetchRepositories(endCursor); // Fetch more repositories when the last element is in view
-      }
-    });
-
-    if (observerRef.current) {
-      observer.observe(observerRef.current); // Observe the sentinel element
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current); // Clean up observer on component unmount
-      }
-    };
-  }, [endCursor, hasNextPage, loading]);
+  // Function to load more repositories
+  const loadMoreRepositories = () => {
+    fetchRepositories(endCursor); // Fetch more repositories using the current endCursor
+  };
 
   return (
     <div className="container">
@@ -108,11 +91,11 @@ const GitHubRepositories = () => {
       ) : (
         <RepositoryList repositories={repositories} />
       )}
-      {/* Sentinel element for infinite scrolling */}
-      <div
-        ref={observerRef}
-        style={{ height: "20px", marginBottom: "20px" }}
-      ></div>
+      {hasNextPage && !loading && (
+        <button onClick={loadMoreRepositories} className="btn btn-primary">
+          Load More Repositories
+        </button>
+      )}
       {loading && repositories.length > 0 && (
         <p>Loading more repositories...</p>
       )}
