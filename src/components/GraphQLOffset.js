@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import ".././styles.css"; // Add this line to link the CSS file
+import ReactPaginate from "react-paginate";
+import ".././styles.css";
 
-const ServerSide = () => {
+const GraphQLOffset = () => {
   const [posts, setPosts] = useState([]); // State to hold posts
   const [loading, setLoading] = useState(false); // Loading state
-  const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [currentPage, setCurrentPage] = useState(0); // Current page (0-indexed)
   const [totalPosts, setTotalPosts] = useState(0); // Total number of posts
   const [postsPerPage] = useState(2); // Number of posts per page
 
@@ -16,7 +17,7 @@ const ServerSide = () => {
       const query = `
         query {
           blogPostCollection(limit: ${postsPerPage}, skip: ${
-        (currentPage - 1) * postsPerPage
+        currentPage * postsPerPage
       }) {
             total
             items {
@@ -52,15 +53,26 @@ const ServerSide = () => {
     fetchPosts();
   }, [currentPage, postsPerPage]); // Fetch the next page of posts when the current page changes
 
+  // Handle page click from ReactPaginate
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
   return (
     <div className="container">
       <h1 className="my-5">Blog Posts</h1>
       {loading ? <p>Loading...</p> : <PostList posts={posts} />}
-      <Pagination
-        postsPerPage={postsPerPage}
-        totalPosts={totalPosts}
-        currentPage={currentPage}
-        paginate={setCurrentPage} // Passing setCurrentPage to handle page change
+      <ReactPaginate
+        previousLabel={"Previous"}
+        nextLabel={"Next"}
+        breakLabel={"..."}
+        breakClassName={"break-me"}
+        pageCount={Math.ceil(totalPosts / postsPerPage)} // Total number of pages
+        marginPagesDisplayed={2} // How many pages to show at the beginning and end
+        pageRangeDisplayed={3} // How many pages to show around the current page
+        onPageChange={handlePageClick} // What happens when a page is clicked
+        containerClassName={"pagination"} // CSS class for the pagination container
+        activeClassName={"active"} // CSS class for the active page
       />
     </div>
   );
@@ -80,38 +92,4 @@ const PostList = ({ posts }) => {
   );
 };
 
-const Pagination = ({ postsPerPage, totalPosts, paginate, currentPage }) => {
-  const pageNumbers = [];
-
-  for (let i = 1; i <= Math.ceil(totalPosts / postsPerPage); i++) {
-    pageNumbers.push(i);
-  }
-
-  const handleClick = (e, number) => {
-    e.preventDefault(); // Prevent default anchor behavior
-    paginate(number);
-  };
-
-  return (
-    <nav>
-      <ul className="pagination">
-        {pageNumbers.map((number) => (
-          <li
-            key={number}
-            className={`page-item ${currentPage === number ? "active" : ""}`}
-          >
-            <a
-              onClick={(e) => handleClick(e, number)} // Added e.preventDefault()
-              href="!#"
-              className="page-link"
-            >
-              {number}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-};
-
-export default ServerSide;
+export default GraphQLOffset;
