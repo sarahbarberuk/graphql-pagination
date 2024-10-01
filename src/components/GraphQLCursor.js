@@ -19,14 +19,14 @@ const GitHubRepositories = () => {
           repositories(first: $first, after: $after) {
             edges {
               node {
-                name
-                description
-                createdAt
+                name,
+                description,
+                createdAt,
                 url
               }
             }
             pageInfo {
-              endCursor
+              endCursor,
               hasNextPage
             }
           }
