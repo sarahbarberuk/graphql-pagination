@@ -24,7 +24,7 @@ const GitHubRepositories = () => {
                 createdAt,
                 url
               }
-            }
+            },
             pageInfo {
               endCursor,
               hasNextPage
