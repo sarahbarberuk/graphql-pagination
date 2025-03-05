@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 const Home = () => {
   return (
     <div className="container">
-      <h1 className="my-5">GraphQL pagination example</h1>
+      <h1 className="my-5">GraphQL pagination examples</h1>
       <ul className="list-group">
         <li className="list-group-item">
           <Link to="/offset">Offset-based</Link>
